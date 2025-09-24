@@ -9,10 +9,10 @@ Polynomial p1 = new Polynomial(c1, c1INT);
 double [] c2 = {-2,-9};
 int [] c2INT = {1,3};
 Polynomial p2 = new Polynomial(c2, c2INT);
-Polynomial s = p1.add(p2);
-System.out.println(Arrays.toString(s.array) + "\n" + Arrays.toString(s.powerArray));
+Polynomial s = p1.multiply(p2);
+System.out.println(Arrays.toString(s.getArray()) + "\n" + Arrays.toString(s.getPowerArray()));
 
-System.out.println("s(0.1) = " + s.evaluate(1.0));
+System.out.println("s(0.1) = " + s.evaluate(0.1));
 
 /*
 if(s.hasRoot(1))

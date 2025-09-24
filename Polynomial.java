@@ -15,6 +15,54 @@ public class Polynomial {
         
     }
 
+    public Polynomial multiply(Polynomial p2){
+        double[] Marray = new double[1];
+        int[] Mpowerarray = new int[1];
+        Polynomial pFinal = new Polynomial(); 
+
+        //traverse the loop and multiply the polynomials one by one
+        for(int one = 0; one < this.array.length; one++){
+
+            //this.array is the outer shell during traversal
+            for(int two = 0; two < p2.array.length; two++){
+
+                Marray[0] = p2.array[two] * this.array[one];
+                // multiply the coefficients
+
+                Mpowerarray[0] = p2.powerArray[two] + this.powerArray[one];
+                // add the powers
+
+                Polynomial placeholder = new Polynomial(Marray, Mpowerarray);
+                pFinal = pFinal.add(placeholder);
+            }
+        }
+        //resetting the pointer to the arrays because I like those names and don't want to think of new ones.
+        Marray = new double[0];
+        int iMarray = 0;
+        Mpowerarray = new int[0];
+        int iMpowerarray = 0;
+
+        //check for zero entries in pFinal
+        for(int i = 0; i < pFinal.array.length; i++){
+            if(pFinal.array[i] != 0.0){
+                Marray = Arrays.copyOf(Marray, Marray.length + 1);
+                Marray[iMarray] = pFinal.array[i];
+
+                Mpowerarray = Arrays.copyOf(Mpowerarray, Mpowerarray.length + 1);
+                Mpowerarray[iMpowerarray] = pFinal.powerArray[i];
+                //set the new arrays to the pFinal array element that is non zero
+
+                iMarray++;
+                iMpowerarray++;
+                //increase the iterators
+            }
+            else{
+                //do nothing lol
+            }
+        }
+
+        return new Polynomial(Marray, Mpowerarray);
+    }
 
     public Polynomial add(Polynomial p2){
         double[] newArray = new double[0];
@@ -76,6 +124,14 @@ public class Polynomial {
         }
         //look through the power array of p2 to add the unique ones
         return new Polynomial(newArray, newPowerArray);
+    }
+
+    public double[] getArray(){
+        return this.array;
+    }
+
+    public int[] getPowerArray(){
+        return this.powerArray;
     }
 
 
