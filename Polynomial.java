@@ -1,18 +1,101 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
+
+
 
 public class Polynomial {
     double[] array; //set to package private
     int[] powerArray;
+
     public Polynomial(){
         array = new double[1];
         powerArray = new int[1];
         array[0] = 0;
         powerArray[0] = 0;
     }    
+
+
     public Polynomial(double inputArray[], int inputPowerArray[]){
         array = Arrays.copyOf(inputArray, inputArray.length);
         powerArray = Arrays.copyOf(inputPowerArray, inputPowerArray.length);
-        
+    }
+
+
+    public Polynomial(File file){
+        String line = "";
+        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
+            while(reader.readLine() != null){
+                line = line + reader.readLine();
+            }
+        }
+        catch(IOException e){
+            System.err.println("An error occured when trying to read the file");
+        }
+        array = new double[0];
+        powerArray = new int[0];
+
+        String[] terms = line.split("-\\+");
+        for (String term : terms) {
+            //term is just x
+            if (term.length() == 1 && term.contains("x")) {
+                array = Arrays.copyOf(array, array.length + 1);
+                array[array.length - 1] = 1.0;
+
+                powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
+                powerArray[powerArray.length - 1] = 1;
+            } else if (!term.contains("x")) {
+                array = Arrays.copyOf(array, array.length + 1);
+                array[array.length - 1] = Double.parseDouble(term);
+                powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
+                powerArray[powerArray.length - 1] = 0;
+            } else if (term.charAt(0) == 'x') {
+                array = Arrays.copyOf(array, array.length + 1);
+                array[array.length - 1] = 1.0;
+                powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
+                powerArray[powerArray.length - 1] = Integer.parseInt(term.substring(1));
+            }
+            //check if last term is x
+            if (term.charAt(term.length() - 1) == 'x') {
+                array = Arrays.copyOf(array, array.length + 1);
+                array[array.length - 1] = Double.parseDouble(term.substring(0, term.length()));
+                powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
+                powerArray[powerArray.length - 1] = 1;
+            } else {
+                array = Arrays.copyOf(array, array.length + 1);
+                array[array.length - 1] = Double.parseDouble(term.substring(0, term.indexOf("x")));
+                powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
+                powerArray[powerArray.length - 1] = Integer.parseInt(term.substring(term.indexOf("x") + 1, term.length()));
+            }
+        }
+    }
+
+    public void SaveToFile(String FileDestination){
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(FileDestination))){
+            for(int i = 0; i < array.length; i++){
+                if(i != 0 && array[i] > 0.0){
+                    writer.write("+");
+                }
+                
+                //write the coefficient
+                writer.write(Double.toString(array[i]));
+
+
+                //write the "x"
+                writer.write("x");
+
+
+                //write the power
+                writer.write(Integer.toString(powerArray[i]));
+            }
+        }
+        catch(IOException e){
+            System.err.println("Error(s) occured while writing to" + FileDestination);
+        }
     }
 
     public Polynomial multiply(Polynomial p2){
@@ -63,6 +146,8 @@ public class Polynomial {
 
         return new Polynomial(Marray, Mpowerarray);
     }
+
+
 
     public Polynomial add(Polynomial p2){
         double[] newArray = new double[0];
@@ -123,12 +208,15 @@ public class Polynomial {
             }
         }
         //look through the power array of p2 to add the unique ones
+
         return new Polynomial(newArray, newPowerArray);
     }
+
 
     public double[] getArray(){
         return this.array;
     }
+
 
     public int[] getPowerArray(){
         return this.powerArray;
@@ -143,6 +231,8 @@ public class Polynomial {
         }
         return evalValue;
     }
+
+
     public boolean hasRoot(double value){
         return evaluate(value) == 0.0;
     }
