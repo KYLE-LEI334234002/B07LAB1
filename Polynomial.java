@@ -26,77 +26,94 @@ public class Polynomial {
     }
 
 
-    public Polynomial(File file){
+    public Polynomial(File file){//this one works 
         String line = "";
         try(BufferedReader reader = new BufferedReader(new FileReader(file))){
-            while(reader.readLine() != null){
-                line = line + reader.readLine();
-            }
+            line = reader.readLine();
         }
         catch(IOException e){
             System.err.println("An error occured when trying to read the file");
         }
+
         array = new double[0];
         powerArray = new int[0];
 
-        String[] terms = line.split("-\\+");
+        String[] terms = line.split("[\\-\\+]");
+        
         for (String term : terms) {
-            //term is just x
-            if (term.length() == 1 && term.contains("x")) {
-                array = Arrays.copyOf(array, array.length + 1);
+            array = Arrays.copyOf(array, array.length + 1);
+            powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
+            //check if term is only x
+            if(term.length() == 1 && term.charAt(0) == 'x'){
                 array[array.length - 1] = 1.0;
-
-                powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
                 powerArray[powerArray.length - 1] = 1;
-            } else if (!term.contains("x")) {
-                array = Arrays.copyOf(array, array.length + 1);
-                array[array.length - 1] = Double.parseDouble(term);
-                powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
-                powerArray[powerArray.length - 1] = 0;
-            } else if (term.charAt(0) == 'x') {
-                array = Arrays.copyOf(array, array.length + 1);
+            }
+            //check if first term is x
+            else if(term.charAt(0) == 'x'){
                 array[array.length - 1] = 1.0;
-                powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
                 powerArray[powerArray.length - 1] = Integer.parseInt(term.substring(1));
             }
-            //check if last term is x
-            if (term.charAt(term.length() - 1) == 'x') {
-                array = Arrays.copyOf(array, array.length + 1);
-                array[array.length - 1] = Double.parseDouble(term.substring(0, term.length()));
-                powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
+
+            //term is only the coefficient 
+            else if (!term.contains("x")) {
+                array[array.length - 1] = Double.parseDouble(term);
+                powerArray[powerArray.length - 1] = 0;
+            } 
+        
+            //check if last term is x 
+            else if (term.charAt(term.length() - 1) == 'x') {
+                array[array.length - 1] = Double.parseDouble(term.substring(0, term.length() - 1));
                 powerArray[powerArray.length - 1] = 1;
-            } else {
-                array = Arrays.copyOf(array, array.length + 1);
+            } 
+            
+            //normal term
+            else {
                 array[array.length - 1] = Double.parseDouble(term.substring(0, term.indexOf("x")));
-                powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
                 powerArray[powerArray.length - 1] = Integer.parseInt(term.substring(term.indexOf("x") + 1, term.length()));
+            }
+            
+            //check if there exists a negative version of the term
+            if(line.contains("-" + term)){
+                array[array.length - 1] = array[array.length - 1] * (-1);
             }
         }
     }
 
+
+    
     public void SaveToFile(String FileDestination){
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(FileDestination))){
             for(int i = 0; i < array.length; i++){
                 if(i != 0 && array[i] > 0.0){
+                    System.out.println("+ happened");
                     writer.write("+");
                 }
+
+                if(array[i] != 1.0){
+                    //write the coefficient
+                    writer.write(Double.toString(array[i]));
+                }
                 
-                //write the coefficient
-                writer.write(Double.toString(array[i]));
 
+                if(array[i] != 0){
+                   //write the "x"
+                    writer.write("x"); 
+                }
+                
 
-                //write the "x"
-                writer.write("x");
-
-
-                //write the power
-                writer.write(Integer.toString(powerArray[i]));
+                if(array[i] > 1){
+                    //write the power
+                    writer.write(Integer.toString(powerArray[i]));
+                }
+                
             }
         }
         catch(IOException e){
             System.err.println("Error(s) occured while writing to" + FileDestination);
         }
     }
+
+
 
     public Polynomial multiply(Polynomial p2){
         double[] Marray = new double[1];
