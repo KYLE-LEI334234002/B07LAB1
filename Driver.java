@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.Arrays;
 
 public class Driver{
 public static void main(String [] args) {
@@ -13,16 +14,10 @@ Polynomial p2 = new Polynomial(c2, c2INT);
 
 File file = new File("test.txt"); 
 Polynomial s = new Polynomial(file);
-s = s.add(p2);
-s.SaveToFile("test.txt");
-
-
-/*
-if(s.hasRoot(1))
-System.out.println("1 is a root of s");
-else
-System.out.println("1 is not a root of s");
-*/
+Polynomial s2 = new Polynomial(new File("test2.txt"));
+s = s.add(s2);
+System.out.println(Arrays.toString(s.getArray()) + Arrays.toString(s.getPowerArray()));
+s.SaveToFile(file.getName());
 }
 }
 

@@ -38,70 +38,76 @@ public class Polynomial {
         array = new double[0];
         powerArray = new int[0];
 
-        String[] terms = line.split("[\\-\\+]");
-        
-        for (String term : terms) {
-            array = Arrays.copyOf(array, array.length + 1);
-            powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
-            //check if term is only x
-            if(term.length() == 1 && term.charAt(0) == 'x'){
-                array[array.length - 1] = 1.0;
-                powerArray[powerArray.length - 1] = 1;
-            }
-            //check if first term is x
-            else if(term.charAt(0) == 'x'){
-                array[array.length - 1] = 1.0;
-                powerArray[powerArray.length - 1] = Integer.parseInt(term.substring(1));
-            }
 
-            //term is only the coefficient 
-            else if (!term.contains("x")) {
-                array[array.length - 1] = Double.parseDouble(term);
-                powerArray[powerArray.length - 1] = 0;
-            } 
-        
-            //check if last term is x 
-            else if (term.charAt(term.length() - 1) == 'x') {
-                array[array.length - 1] = Double.parseDouble(term.substring(0, term.length() - 1));
-                powerArray[powerArray.length - 1] = 1;
-            } 
+        if(!line.isEmpty()){
+            String[] terms = line.split("[\\-\\+]");
             
-            //normal term
-            else {
-                array[array.length - 1] = Double.parseDouble(term.substring(0, term.indexOf("x")));
-                powerArray[powerArray.length - 1] = Integer.parseInt(term.substring(term.indexOf("x") + 1, term.length()));
-            }
-            
-            //check if there exists a negative version of the term
-            if(line.contains("-" + term)){
-                array[array.length - 1] = array[array.length - 1] * (-1);
+            for (String term : terms) {
+                if(!term.isEmpty()){
+                    array = Arrays.copyOf(array, array.length + 1);
+                    powerArray = Arrays.copyOf(powerArray, powerArray.length + 1);
+                    //check if term is only x
+                    if(term.length() == 1 && term.charAt(0) == 'x'){
+                        array[array.length - 1] = 1.0;
+                        powerArray[powerArray.length - 1] = 1;
+                    }
+                    //check if first term is x
+                    else if(term.indexOf("x") == 0){
+                        array[array.length - 1] = 1.0;
+                        powerArray[powerArray.length - 1] = Integer.parseInt(term.substring(1));
+                    }
+
+                    //term is only the coefficient 
+                    else if (!term.contains("x")) {
+                        array[array.length - 1] = Double.parseDouble(term);
+                        powerArray[powerArray.length - 1] = 0;
+                    } 
+                
+                    //check if last term is x 
+                    else if (term.charAt(term.length() - 1) == 'x') {
+                        array[array.length - 1] = Double.parseDouble(term.substring(0, term.length() - 1));
+                        powerArray[powerArray.length - 1] = 1;
+                    } 
+                    
+                    //normal term
+                    else {
+                        array[array.length - 1] = Double.parseDouble(term.substring(0, term.indexOf("x")));
+                        powerArray[powerArray.length - 1] = Integer.parseInt(term.substring(term.indexOf("x") + 1, term.length()));
+                    }
+                    
+                    //check if there exists a negative version of the term
+                    if(line.contains("-" + term)){
+                        array[array.length - 1] = array[array.length - 1] * (-1);
+                    }
+                }
+                
             }
         }
+        
     }
 
 
     
-    public void SaveToFile(String FileDestination){
+    public void SaveToFile(String FileDestination){ // this works now
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(FileDestination))){
             for(int i = 0; i < array.length; i++){
                 if(i != 0 && array[i] > 0.0){
-                    System.out.println("+ happened");
                     writer.write("+");
                 }
 
-                if(array[i] != 1.0){
+                if(array[i] != 1.0 && array[i] != 0.0){
                     //write the coefficient
-                    writer.write(Double.toString(array[i]));
+                    writer.write(Integer.toString((int)array[i])); //cast to int
                 }
                 
 
-                if(array[i] != 0){
+                if(powerArray[i] != 0 && array[i] != 0.0){
                    //write the "x"
                     writer.write("x"); 
                 }
                 
 
-                if(array[i] > 1){
+                if(powerArray[i] > 1 && array[i] != 0.0){
                     //write the power
                     writer.write(Integer.toString(powerArray[i]));
                 }
@@ -166,27 +172,31 @@ public class Polynomial {
 
 
 
-    public Polynomial add(Polynomial p2){
+    public Polynomial add(Polynomial p2){ 
         double[] newArray = new double[0];
         int[] newPowerArray = new int[0];
         boolean isMatch;
+        
         for(int one = 0; one < this.powerArray.length; one++){//go through array one int
             isMatch = false;
             for(int two = 0; two < p2.powerArray.length; two++){//go through array two int
-                if(this.powerArray[one] == p2.powerArray[two]){
-                    //
-                    newPowerArray = Arrays.copyOf(newPowerArray, newPowerArray.length + 1);
-                    newPowerArray[newPowerArray.length - 1] = this.powerArray[one];
-                    //add power to the new array
+                if(this.powerArray[one] == p2.powerArray[two]){ 
+                    if(this.array[one] + p2.array[two] != 0){
+                        // also make sure they don't cancel out
+                        newPowerArray = Arrays.copyOf(newPowerArray, newPowerArray.length + 1);
+                        newPowerArray[newPowerArray.length - 1] = this.powerArray[one];
+                        //add power to the new array
+                        
+                        //
+                        newArray = Arrays.copyOf(newArray, newArray.length + 1);
+                        newArray[newArray.length - 1] = this.array[one] + p2.array[two];
+                        //add coefficient to the new array
+                    }
                     
-                    //
-                    newArray = Arrays.copyOf(newArray, newArray.length + 1);
-                    newArray[newArray.length - 1] = this.array[one] + p2.array[two];
-                    //add coefficient to the new array
 
                     //
                     isMatch = true;
-                    // Set the is Match to true so that afterwards things can be added
+                    // Set the is Match to true so that afterwards things shouldn't be added
                 }
                 //case one if they have the same power
             }
@@ -205,6 +215,8 @@ public class Polynomial {
             //Add the polynomial entries that weren't a match from this.
         }
 
+        
+        //look through the power array of p2 to add the unique ones
         for(int two = 0; two < p2.powerArray.length; two++){
             isMatch = false;
             for(int one = 0; one < this.powerArray.length; one++){
@@ -224,8 +236,7 @@ public class Polynomial {
                 //Insert the (same) power, this time with p2
             }
         }
-        //look through the power array of p2 to add the unique ones
-
+        
         return new Polynomial(newArray, newPowerArray);
     }
 
